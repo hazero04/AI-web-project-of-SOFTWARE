@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서경대학교 소프트웨어학과 홈페이지</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500;700&display=swap');
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #333;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* 헤더 */
+        header {
+            width: 100%; padding: 20px 50px;
+            background-color: transparent;
+            position: absolute;
+            top: 0; z-index: 1000;
+            pointer-events: none;
+        }
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            pointer-events: auto;
+        }
+        .logo img {
+            height: 80px;
+            width: auto;
+            mix-blend-mode: multiply;
+        }
+
+        /* =========================================
+           섹션 1: 히어로 (main + computer_engineering 병합)
+           =========================================
+           main:               영상 박스, 단순 녹색 서클
+           computer_engineering: hero-badge, 그라디언트 서클,
+                                 scroll-hint 애니메이션
+           → 모두 통합
+        */
+        #hero-scroll-section {
+            height: 250vh;
+            position: relative;
+        }
+
+        .hero-sticky {
+            position: sticky; top: 0; height: 100vh; width: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        /* ▼ computer_engineering: 그라디언트 서클 (기존 단색보다 풍부) */
+        .circle-ui {
+            position: absolute; width: 420px; height: 420px; border-radius: 50%;
+            background: radial-gradient(circle, #2ecc71 0%, #002347 100%);
+            filter: blur(90px); opacity: 0.35; z-index: 1;
+        }
+        #circle-left  { left: -210px; }
+        #circle-right { right: -210px; }
+
+        /* ▼ computer_engineering: hero-badge */
+        .hero-badge {
+            position: relative; z-index: 10;
+            background: rgba(46,204,113,0.12);
+            border: 1px solid rgba(46,204,113,0.4);
+            color: #2ecc71; padding: 6px 22px; border-radius: 50px;
+            font-size: 0.85rem; font-weight: 700; letter-spacing: 2px;
+            margin-bottom: 28px;
+        }
+
+        .text-container {
+            position: relative; width: 100%; z-index: 10;
+            display: flex; justify-content: center; align-items: center; height: 110px;
+        }
+
+        #dynamic-hero-text {
+            position: absolute; width: 100%; text-align: center;
+            font-size: 3.5rem; font-weight: 700; letter-spacing: 1px;
+            color: #002347;
+            white-space: nowrap; word-break: keep-all;
+            transition: opacity 0.4s ease;
+        }
+
+        /* ▼ main: 영상 박스 (유지) */
+        .image-box {
+            width: 80%; max-width: 800px; height: 350px;
+            margin-top: 36px; z-index: 5;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            background-color: #f8f9fa;
+        }
+        .image-box img,
+        .image-box video {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        /* ▼ computer_engineering: 스크롤 힌트 */
+        .hero-scroll-hint {
+            position: relative; z-index: 10; margin-top: 28px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            color: #aaa; font-size: 0.78rem; letter-spacing: 2px;
+        }
+        .scroll-bar {
+            width: 1px; height: 44px;
+            background: linear-gradient(to bottom, #2ecc71, transparent);
+            animation: scrollDown 1.5s infinite;
+        }
+        @keyframes scrollDown {
+            0%   { transform: scaleY(0); transform-origin: top; }
+            50%  { transform: scaleY(1); transform-origin: top; }
+            51%  { transform: scaleY(1); transform-origin: bottom; }
+            100% { transform: scaleY(0); transform-origin: bottom; }
+        }
+
+        /* =========================================
+           섹션 2: 슬로건 스크롤 전환 (main + computer_engineering 병합)
+           =========================================
+           main:               한국어 슬로건, 소프트웨어 코드 스니펫
+           computer_engineering: C/알고리즘 계열 코드 스니펫
+           → 슬로건 텍스트는 main 유지,
+             코드 스니펫은 두 파일 혼합
+        */
+        #slogan-scroll-section { height: 150vh; position: relative; }
+
+        .slogan-sticky {
+            position: sticky; top: 0; height: 100vh; width: 100%;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        .slogan-text {
+            position: absolute; font-size: 2.8rem; font-weight: 700; text-align: center;
+            transition: opacity 0.5s ease, transform 0.5s ease; width: 100%;
+            z-index: 10;
+        }
+
+        .tech-ui-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; transition: opacity 0.8s ease; pointer-events: none; z-index: 1;
+        }
+
+        /* 코드 스니펫: main + computer_engineering 통합 */
+        .code-snippet {
+            position: absolute; font-family: 'Courier New', Courier, monospace;
+            color: rgba(46,204,113,0.2); font-size: 1.15rem; font-weight: bold;
+            white-space: nowrap; animation: floatAnim 6s infinite ease-in-out alternate;
+        }
+
+        .node-line {
+            position: absolute; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,35,71,0.15), transparent);
+            animation: pulseAnim 3s infinite;
+        }
+        .node-line::before, .node-line::after {
+            content: ''; position: absolute; width: 6px; height: 6px;
+            border-radius: 50%; background-color: rgba(46,204,113,0.5); top: -2.5px;
+        }
+        .node-line::before { left: 0; }
+        .node-line::after  { right: 0; }
+
+        @keyframes floatAnim {
+            0%   { transform: translateY(0px) translateX(0px); }
+            100% { transform: translateY(-20px) translateX(10px); }
+        }
+        @keyframes pulseAnim {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* =========================================
+           섹션 3: Q&A  (main 원본 유지)
+           ========================================= */
+        #qna-section {
+            padding: 120px 20px; background-color: #ffffff; text-align: center;
+        }
+        .section-title { font-size: 2.5rem; margin-bottom: 60px; color: #002347; }
+
+        .qna-grid {
+            display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;
+            max-width: 1200px; margin: 0 auto;
+        }
+        .qna-card {
+            width: 350px; height: 200px; background-color: #1b5e20;
+            border-radius: 20px; border-top-left-radius: 0; padding: 40px 30px;
+            position: relative; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease; text-align: left; display: flex; align-items: center;
+        }
+        .qna-card::before {
+            content: ''; position: absolute; top: 0; left: -15px;
+            border-top: 15px solid #1b5e20; border-left: 15px solid transparent;
+        }
+        .qna-card:hover { transform: translateY(-8px); }
+        .qna-question { color: #ffffff; font-size: 1.25rem; font-weight: 700; line-height: 1.4; }
+        .qna-answer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #ffffff; color: #333; padding: 30px;
+            border-radius: 20px; border-top-left-radius: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem; font-weight: 500; text-align: center; line-height: 1.5;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .qna-answer::before {
+            content: ''; position: absolute; top: 0; left: -15px;
+            border-top: 15px solid #ffffff; border-left: 15px solid transparent;
+        }
+        .qna-card:hover .qna-answer { opacity: 1; visibility: visible; }
+
+        /* =========================================
+           섹션 4: 전공 안내  (main 원본 유지)
+           ========================================= */
+        #majors-section { padding: 120px 20px; background-color: #f8f9fa; text-align: center; }
+        .majors-grid {
+            display: flex; gap: 40px; justify-content: center; max-width: 1000px; margin: 0 auto;
+        }
+        .major-card {
+            flex: 1; background: #fff; padding: 50px; border-radius: 20px; text-align: left;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03); border: 1px solid #eee;
+            display: flex; flex-direction: column; justify-content: space-between;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .major-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-color: #2ecc71;
+        }
+        .major-card h3 {
+            font-size: 1.8rem; color: #002347; margin-bottom: 20px;
+            border-bottom: 3px solid #2ecc71; display: inline-block; padding-bottom: 10px;
+        }
+        .major-card p { margin-bottom: 15px; color: #555; }
+        .major-card ul { margin-left: 20px; margin-bottom: 30px; color: #555; }
+        .btn-link {
+            display: block; width: 100%; text-align: center; padding: 15px;
+            background-color: #002347; color: #fff; text-decoration: none;
+            border-radius: 8px; font-weight: 700; transition: background 0.3s;
+        }
+        .btn-link:hover { background-color: #2ecc71; }
+
+        @media (max-width: 768px) {
+            #dynamic-hero-text { font-size: 2rem; white-space: normal; }
+            .slogan-text { font-size: 1.8rem; }
+            .majors-grid { flex-direction: column; }
+        }
+
+        /* MBTI 섹션 전체 설정 */
+#mbti-career-guide {
+    padding: 100px 20px;
+    background-color: #fcfdfd;
+    text-align: center;
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* 상단 초록색 뱃지 (영상 디자인 반영) */
+.pill-badge-green {
+    display: inline-block;
+    background-color: #e6f7ef;
+    color: #27ae60;
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+.mbti-main-title {
+    font-size: 2.2rem;
+    color: #1e293b;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.mbti-main-subtitle {
+    color: #64748b;
+    margin-bottom: 50px;
+    font-size: 1.1rem;
+}
+
+/* 카드 그리드 정렬 */
+.mbti-container {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.mbti-card {
+    flex: 1;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 1px solid #eef2f6;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.mbti-card:hover { transform: translateY(-8px); }
+
+/* 카드 헤더 디자인 */
+.card-header {
+    padding: 20px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+.ai-card .card-header { background-color: #f5f3ff; color: #7c3aed; }
+.cs-card .card-header { background-color: #ecfdf5; color: #059669; }
+
+/* 표 디자인 */
+.mbti-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mbti-table th {
+    padding: 15px;
+    background-color: #f8fafc;
+    font-size: 0.9rem;
+    color: #64748b;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.mbti-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f8fafc;
+    font-size: 0.95rem;
+    text-align: left;
+    color: #334155;
+}
+
+.mbti-table td:first-child {
+    font-weight: 700;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* MBTI 텍스트 컬러 포인트 */
+.type-ai { color: #8b5cf6; }
+.type-cs { color: #10b981; }
+
+/* 하단 푸터 및 애니메이션 */
+.mbti-footer {
+    margin-top: 50px;
+}
+
+.mbti-footer p {
+    color: #27ae60;
+    font-weight: 700;
+    font-size: 1.2rem;
+    display: inline-block; /* 애니메이션이 부드럽게 먹히도록 함.*/
+    animation: bounceText 2s infinite; /* 통통 튀는 효과 */
+}
+
+/*상세페이지 확인하라는 부분에 통통 튀는 효과 주기*/
+@keyframes bounceText {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
+}
+
+.scroll-arrow {
+    margin-top: 15px;
+    color: #27ae60;
+    font-size: 1.5rem;
+    animation: bounceArrow 2s infinite;
+}
+
+@keyframes bounceArrow {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
+}
+
+/* 반응형 (모바일) */
+@media (max-width: 850px) {
+    .mbti-container { flex-direction: column; }
+}
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="logo.jpg" alt="서경대학교 로고">
+        </div>
+    </header>
+
+    <!-- =========================================
+         섹션 1: 히어로 (병합)
+         ========================================= -->
+    <section id="hero-scroll-section">
+        <div class="hero-sticky">
+            <div id="circle-left"  class="circle-ui"></div>
+            <div id="circle-right" class="circle-ui"></div>
+
+            <!-- ▼ computer_engineering에서 추가: 학과 배지 -->
+            <div class="hero-badge">DEPT. OF SOFTWARE ENGINEERING</div>
+
+            <div class="text-container">
+                <h1 id="dynamic-hero-text">SOFTWARE CREATES FUTURE</h1>
+            </div>
+
+            <!-- ▼ main에서 유지: 학교 전경 영상 박스 -->
+            <div class="image-box">
+                <video src="학교 전경 영상.mp4" autoplay loop muted playsinline></video>
+            </div>
+
+            <!-- ▼ computer_engineering에서 추가: 스크롤 힌트 -->
+            <div class="hero-scroll-hint">
+                <span>SCROLL</span>
+                <div class="scroll-bar"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         섹션 2: 슬로건 전환 (병합)
+         =========================================
+         슬로건 텍스트 → main 원본 유지
+         코드 스니펫   → main(JS/데이터) + computer_engineering(C/알고리즘) 혼합
+    -->
+    <section id="slogan-scroll-section">
+        <div class="slogan-sticky">
+
+            <div class="tech-ui-bg" id="tech-bg">
+                <!-- main 출처: JS / 데이터 계열 -->
+                <span class="code-snippet" style="top:25%;left:15%;animation-delay:0s;">const future = new Tech();</span>
+                <span class="code-snippet" style="top:70%;left:72%;animation-delay:1s;">if (innovate) { data.push(AI); }</span>
+                <span class="code-snippet" style="top:80%;left:20%;animation-delay:0.5s;font-size:0.95rem;">01100010 01101001 01100111</span>
+
+                <!-- computer_engineering 출처: C / 알고리즘 계열 -->
+                <span class="code-snippet" style="top:18%;right:8%;animation-delay:2s;">#include &lt;algorithm&gt;</span>
+                <span class="code-snippet" style="top:42%;left:6%;animation-delay:1.5s;font-size:1rem;">for(auto& n : graph) BFS(n);</span>
+                <span class="code-snippet" style="top:58%;right:14%;animation-delay:0.8s;font-size:0.9rem;">int main() &#123; return 0; &#125;</span>
+
+                <!-- 공통: 노드 라인 -->
+                <div class="node-line" style="top:40%;left:20%;width:180px;transform:rotate(30deg);"></div>
+                <div class="node-line" style="top:65%;right:25%;width:220px;transform:rotate(-15deg);animation-delay:1s;"></div>
+                <div class="node-line" style="top:20%;right:40%;width:150px;transform:rotate(75deg);animation-delay:2s;"></div>
+                <div class="node-line" style="top:50%;left:55%;width:160px;transform:rotate(-35deg);animation-delay:1.3s;"></div>
+            </div>
+
+            <!-- main 슬로건 유지 -->
+            <h2 id="slogan-1" class="slogan-text" style="color:#333;">상상을 현실로, 미래를 혁신하다</h2>
+            <h2 id="slogan-2" class="slogan-text" style="color:#2ecc71;opacity:0;transform:translateY(30px);">서경대학교 소프트웨어학과</h2>
+        </div>
+    </section>
+
+    <!-- 섹션 3~4: main 원본 유지 -->
+    <section id="qna-section">
+        <h2 class="section-title">속닥속닥~~ 학과 Q&amp;A</h2>
+        <div class="qna-grid">
+            <div class="qna-card">
+                <div class="qna-question">Q. 수학을 잘해야만 올 수 있나요?</div>
+                <div class="qna-answer">논리적 사고력이 중요해요! 대학 입학 후 기초부터 차근차근 배우기 때문에 열정만 있다면 충분히 가능합니다.</div>
+            </div>
+            <div class="qna-card">
+                <div class="qna-question">Q. 코딩 경험이 전혀 없는데 괜찮을까요?</div>
+                <div class="qna-answer">네, 괜찮습니다! 신입생 대부분이 노베이스 상태입니다. 1학년 때 기초부터 탄탄하게 배웁니다.</div>
+            </div>
+            <div class="qna-card">
+                <div class="qna-question">Q. 졸업 후 취업 분야는 주로 어떻게 되나요?</div>
+                <div class="qna-answer">웹/앱 개발자, 인공지능 엔지니어, 빅데이터 분석가 등 다양한 IT 산업 핵심 분야로 진출합니다.</div>
+            </div>
+            <div class="qna-card">
+                <div class="qna-question">Q. 학과 분위기와 선후배 간 교류는 어떤가요?</div>
+                <div class="qna-answer">팀 프로젝트와 멘토링이 활발하여, 선후배 간 지식 공유와 친목 도모가 자연스럽게 이루어집니다.</div>
+            </div>
+            <div class="qna-card">
+                <div class="qna-question">Q. 어떤 노트북이 필요한가요? 미리 사야하나요?</div>
+                <div class="qna-answer">입학 후 학과에서 공지하는 권장 사양(보통 RAM 16GB 이상)을 참고하여 천천히 구매하시는 것이 좋습니다.</div>
+            </div>
+        </div>
+    </section>
+
+
+<section id="mbti-career-guide">
+    <div class="mbti-badge-wrapper">
+        <span class="pill-badge-green">DEPT. OF CAREER MATCHING</span>
+    </div>
+    
+    <h2 class="mbti-main-title">재미로 보는 MBTI별 직군!</h2>
+    <p class="mbti-main-subtitle">내 성향에 찰떡인 IT 직군은 무엇일까? 아래에서 내 MBTI를 찾아보세요!</p>
+
+    <div class="mbti-container">
+        <div class="mbti-card ai-card">
+            <div class="card-header">
+                <span class="icon">🤖</span> AI 전공 추천
+            </div>
+            <table class="mbti-table">
+                <thead>
+                    <tr>
+                        <th width="30%">MBTI</th>
+                        <th width="70%">추천 직무</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="type-ai">INTJ</td><td>머신러닝 엔지니어, 데이터 사이언티스트</td></tr>
+                    <tr><td class="type-ai">INFJ</td><td>소프트웨어 아키텍트, 데이터 분석가</td></tr>
+                    <tr><td class="type-ai">INFP</td><td>데이터 분석가, AI 윤리 전문가</td></tr>
+                    <tr><td class="type-ai">INTP</td><td>알고리즘 엔지니어, 데이터 사이언티스트, R&D 개발자</td></tr>
+                    <tr><td class="type-ai">ENFP</td><td>프로덕트 매니저, 데이터 시각화 전문가</td></tr>
+                    <tr><td class="type-ai">ENTP</td><td>AI 연구원, 기술 창업가, 블록체인 개발자</td></tr>
+                    <tr><td class="type-ai">ENTJ</td><td>CTO, IT 전략 컨설턴트, 데이터 엔지니어</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mbti-card cs-card">
+            <div class="card-header">
+                <span class="icon">💻</span> 컴퓨터 전공 추천
+            </div>
+            <table class="mbti-table">
+                <thead>
+                    <tr>
+                        <th width="30%">MBTI</th>
+                        <th width="70%">추천 직무</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="type-cs">ISTJ</td><td>시스템 엔지니어, DBA, 백엔드 개발자</td></tr>
+                    <tr><td class="type-cs">ISFJ</td><td>IT 프로젝트 매니저, QA 엔지니어, 테크니컬 서포트</td></tr>
+                    <tr><td class="type-cs">ISTP</td><td>백엔드 개발자, 네트워크 엔지니어, DevOps 엔지니어</td></tr>
+                    <tr><td class="type-cs">ISFP</td><td>프론트엔드 개발자, 게임 개발자</td></tr>
+                    <tr><td class="type-cs">ESTP</td><td>사이버 보안 전문가, 네트워크 엔지니어, 시스템 관리자</td></tr>
+                    <tr><td class="type-cs">ESFP</td><td>게임 개발자, 멀티미디어 개발자, IT 컨설턴트</td></tr>
+                    <tr><td class="type-cs">ESTJ</td><td>IT 프로젝트 매니저, ERP 엔지니어, 정보 보안 관리자</td></tr>
+                    <tr><td class="type-cs">ESFJ</td><td>IT 컨설턴트, 고객 기술 지원, HR 테크 매니저</td></tr>
+                    <tr><td class="type-cs">ENFJ</td><td>프로덕트 매니저, 테크 에반젤리스트, 데이터 전략가</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mbti-footer">
+        <p>👇 더 자세한 내용은 아래 전공 상세페이지에서 확인해 보세요! 👇</p>
+        <div class="scroll-arrow">
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+    </div>
+</section>
+
+
+    <section id="majors-section">
+        <h2 class="section-title">전공 상세 안내</h2>
+        <div class="majors-grid">
+            <div class="major-card">
+                <div>
+                    <h3>컴퓨터소프트웨어 전공</h3>
+                    <p>컴퓨터 시스템의 설계, 개발, 유지 보수를 다루며 소프트웨어 엔지니어링, 프로그래밍, 데이터베이스 관리, 운영체제, 네트워크, 인공지능, 보안, 웹 개발 등 다양한 분야를 포괄합니다. 최고 시설의 6개 연구실과 9명의 전임교수를 보유하며, 과학기술정통부 SW전문인재양성사업에 선정되었습니다(백엔드 풀스택 트랙).</p>
+                </div>
+                <a href="computer_major.html" target="_blank" class="btn-link">홈페이지 바로가기 ↗</a>
+            </div>
+            <div class="major-card">
+                <div>
+                    <h3>AI빅데이터 전공</h3>
+                    <p>인공지능과 빅데이터 기술을 통합하여 데이터를 분석하고 의미 있는 정보를 도출하며, 데이터 사이언스, 머신러닝, 딥러닝, 컴퓨터 비전 등 다양한 분야를 이룹니다. 최고 시설의 6개 연구실과 9명의 전임교수를 보유하며, 과학기술정통부 SW전문인재양성사업에 선정되었습니다(AI빅데이터 트랙).</p>
+                </div>
+                <a href="ai_major.html" target="_blank" class="btn-link">홈페이지 바로가기 ↗</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const scrollY      = window.scrollY;
+            const windowHeight = window.innerHeight;
+
+            /* ── 섹션 1: 히어로 애니메이션 ── */
+            const heroSection = document.getElementById('hero-scroll-section');
+            const heroRect    = heroSection.getBoundingClientRect();
+            let heroProgress  = -heroRect.top / (heroSection.offsetHeight - windowHeight);
+            heroProgress = Math.max(0, Math.min(1, heroProgress));
+
+            const circleL  = document.getElementById('circle-left');
+            const circleR  = document.getElementById('circle-right');
+            const heroText = document.getElementById('dynamic-hero-text');
+
+            const moveAmount = heroProgress * (window.innerWidth / 2);
+            circleL.style.transform = `translateX(${moveAmount}px)`;
+            circleR.style.transform = `translateX(-${moveAmount}px)`;
+
+            /* 텍스트 3단계 전환 (main 원본 + computer_engineering 3단계 방식 통합) */
+            const phases = [
+                { limit: 0.35, text: 'SOFTWARE CREATES FUTURE',   color: '#002347' },
+                { limit: 0.70, text: '코드로 세상을 연결하다',      color: '#2ecc71' },
+                { limit: 1,    text: '미래를 설계하는 소프트웨어 인재', color: '#002347' }
+            ];
+            const phase = phases.find(p => heroProgress < p.limit) || phases[2];
+            if (heroText.innerText !== phase.text) {
+                heroText.style.opacity = 0;
+                setTimeout(() => {
+                    heroText.innerText   = phase.text;
+                    heroText.style.color = phase.color;
+                    heroText.style.opacity = 1;
+                }, 200);
+            }
+
+            /* ── 섹션 2: 슬로건 애니메이션 ── */
+            const sloganSection = document.getElementById('slogan-scroll-section');
+            const sloganRect    = sloganSection.getBoundingClientRect();
+            let sloganProgress  = -sloganRect.top / (sloganSection.offsetHeight - windowHeight);
+            sloganProgress = Math.max(0, Math.min(1, sloganProgress));
+
+            const slogan1 = document.getElementById('slogan-1');
+            const slogan2 = document.getElementById('slogan-2');
+            const techBg  = document.getElementById('tech-bg');
+
+            techBg.style.opacity = (sloganProgress > 0.1 && sloganProgress < 0.9) ? '1' : '0';
+
+            if (sloganProgress > 0.5) {
+                slogan1.style.opacity   = '0';
+                slogan1.style.transform = 'translateY(-30px)';
+                slogan2.style.opacity   = '1';
+                slogan2.style.transform = 'translateY(0)';
+            } else {
+                slogan1.style.opacity   = '1';
+                slogan1.style.transform = 'translateY(0)';
+                slogan2.style.opacity   = '0';
+                slogan2.style.transform = 'translateY(30px)';
+            }
+        });
+    </script>
+</body>
+</html>
